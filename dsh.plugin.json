@@ -1,0 +1,16 @@
+{
+  "id": "7dgroup/dsh-skill-7d-viewer",
+  "version": "0.1.0",
+  "main": "./lib/index.js",
+  "description": "Bookmark key assistant messages and jump back to them. Per-session, i18n (zh/en), zero native dependencies.",
+  "engines": {
+    "dsh": ">=0.1.0-rc.8"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": []
+  },
+  "client": {
+    "main": "./lib/client-registry.js"
+  }
+}
