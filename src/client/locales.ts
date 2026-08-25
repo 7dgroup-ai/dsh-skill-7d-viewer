@@ -1,42 +1,87 @@
 /**
- * Locale dictionaries for the bookmark plugin. The namespace string is also
- * the `LocaleNamespaceMap` key merged below; `t()` inside components is typed
- * against {@link BookmarkKey}.
+ * Minimal zh/en copy for the sidebar viewer. The sidebar mounts its own React
+ * root outside the slot system's locale seat, so `attachLocale` holds the DSH
+ * locale service (`ctx.locale`) in a module-level holder and `t()` resolves the
+ * active locale from it.
  * @module dsh-skill-7d-viewer/client/locales
  */
 
-/** Locale namespace id; kept in sync with the `locale:` field on every slot entry. */
-export const NS = 'bookmark' as const
-
-/** The dictionary keys (typed union of zh + en keys). */
-export type BookmarkKey = keyof typeof en
-
-/** English dictionary. */
-export const en = {
-  add: 'Bookmark',
-  remove: 'Remove bookmark',
-  panelTitle: 'Bookmarks',
-  panelOpen: 'Open bookmarks',
-  empty: 'No bookmarks yet',
-  emptyHint: 'Bookmark an assistant reply to pin it here',
-  jump: 'Jump to message',
-  copy: 'Copy excerpt',
-  delete: 'Delete',
-  notePlaceholder: 'Add a note…',
-  copied: 'Copied',
+/** Simplified Chinese dictionary. */
+export const zh = {
+  title: '7D-Viewer',
+  expand: '展开查看器',
+  collapse: '收起查看器',
+  close: '关闭',
+  back: '返回文件列表',
+  files: '生成的文件',
+  noFiles: '暂无生成的文件',
+  selectFile: '选择一个文件查看',
+  reveal: '在 Finder 中打开',
+  turn: '第 {n} 轮',
+  source: '源码',
+  preview: '预览',
+  save: '保存',
+  saving: '保存中…',
+  saved: '已保存',
+  loading: '加载中…',
+  binary: '二进制文件，无法预览',
+  truncated: '文件过大，仅显示前一部分',
+  error: '加载失败',
 } as const
 
-/** Simplified Chinese dictionary. */
-export const zh: Record<BookmarkKey, string> = {
-  add: '收藏',
-  remove: '取消收藏',
-  panelTitle: '书签',
-  panelOpen: '打开书签',
-  empty: '还没有书签',
-  emptyHint: '在助手回复上点击收藏，即可固定到这里',
-  jump: '跳转到消息',
-  copy: '复制摘要',
-  delete: '删除',
-  notePlaceholder: '添加备注…',
-  copied: '已复制',
+/** English dictionary. */
+export const en: Record<CopyKey, string> = {
+  title: '7D-Viewer',
+  expand: 'Expand viewer',
+  collapse: 'Collapse viewer',
+  close: 'Close',
+  back: 'Back to files',
+  files: 'Produced files',
+  noFiles: 'No files yet',
+  selectFile: 'Select a file to view',
+  reveal: 'Reveal in Finder',
+  turn: 'Turn {n}',
+  source: 'Source',
+  preview: 'Preview',
+  save: 'Save',
+  saving: 'Saving…',
+  saved: 'Saved',
+  loading: 'Loading…',
+  binary: 'Binary file — cannot preview',
+  truncated: 'File too large — showing a prefix',
+  error: 'Failed to load',
+}
+
+/** The dictionary keys (typed union of zh + en keys). */
+export type CopyKey = keyof typeof zh
+
+/** The locale service face the sidebar reads (a subset of the DSH locale service). */
+interface LocaleFace {
+  getSnapshot(): { active: string }
+}
+
+let localeService: LocaleFace | undefined
+
+/** Attach (or detach, with undefined) the DSH locale service. */
+export function attachLocale(service: LocaleFace | undefined): void {
+  localeService = service
+}
+
+/** The active locale id ('zh' | 'en' | browser fallback). */
+function activeLocale(): string {
+  return localeService?.getSnapshot().active
+    ?? (typeof navigator !== 'undefined' ? navigator.language : '')
+    ?? 'en'
+}
+
+/** Translate a copy key in the active locale (zh → zh, else en). */
+export function t(key: CopyKey, params?: Record<string, string | number>): string {
+  const dict = activeLocale().toLowerCase().startsWith('zh') ? zh : en
+  let text: string = dict[key]
+  if (params !== undefined) {
+    for (const [name, value] of Object.entries(params)) {
+      text = text.replaceAll(`{${name}}`, String(value))
+    }
+  }
+  return text
 }

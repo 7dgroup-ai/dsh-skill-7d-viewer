@@ -2,7 +2,7 @@
   "id": "7dgroup/dsh-skill-7d-viewer",
   "version": "0.1.0",
   "main": "./lib/index.js",
-  "description": "Bookmark key assistant messages and jump back to them. Per-session, i18n (zh/en), zero native dependencies.",
+  "description": "A right sidebar viewer for DSH: lists per-turn produced files, previews text/images/markdown, and edits code in place — instead of opening files in the OS app. i18n (zh/en).",
   "engines": {
     "dsh": ">=0.1.0-rc.8"
   },

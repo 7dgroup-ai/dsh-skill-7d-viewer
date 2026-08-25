@@ -145,4 +145,4 @@ say "dsh web ready: $URL"
 DSH_E2E_URL="$URL" DSH_E2E_WORKSPACE="$WORKSPACE_DIR" \
   pnpm exec playwright test ${GREP_FILTER:+--grep "$GREP_FILTER"}
 
-say "smoke passed: plugin mounted and bookmark persist/jump verified in a real dsh web"
+say "smoke passed: plugin mounted and activated in a real dsh web without crashing"

@@ -1,21 +1,23 @@
 # @7dgroup/dsh-skill-7d-viewer
 
-Bookmark key assistant messages and jump back to them — a focused, pure-browser
-DSH plugin. Per-session, i18n (zh/en), zero native dependencies.
+A **right sidebar viewer** for DSH: it lists the files each turn produced, and
+lets you preview or edit them in place — instead of opening files in the OS app.
 
 [中文](./README.zh.md)
 
 ## Features
 
-- **Bookmark a reply** — a ribbon toggle inside every finalized assistant
-  message pins it to the session's bookmark list.
-- **Jump back** — clicking a bookmark scrolls the conversation to that message.
-- **Notes** — attach a short note to any bookmark.
-- **Per-session isolation** — bookmarks are stored per conversation and survive
-  a page refresh (`localStorage`, best-effort).
-- **i18n** — interface copy follows the DSH language (zh / en) live.
-- **Zero native deps** — no node-pty, no file/terminal/git surface; the host
-  half is a no-op, so install is frictionless.
+- **Per-turn file list** — the sidebar lists every file produced across the
+  conversation, grouped by turn.
+- **Intercept file-open clicks** — chat file mentions open in the sidebar, not
+  the OS app.
+- **Markdown source/preview** — `.md` files toggle between editable source and a
+  rendered preview.
+- **Code edit + save** — text/code files open in an editable area with a Save
+  button (atomic write on the host).
+- **Image preview** — PNG / JPG / GIF / WebP / SVG / BMP / ICO / AVIF inline.
+- **Binary detection** — non-image binary files show a "cannot preview" note.
+- **i18n** — copy follows the DSH language (zh / en).
 
 ## Install
 
@@ -27,26 +29,22 @@ Then hard-refresh the browser (Cmd/Ctrl+Shift+R).
 
 ## Usage
 
-1. Hover an assistant reply and click the bookmark ribbon to pin it.
-2. Click the bookmark list button in the session header (the list icon with a
-   count) to open the panel.
-3. In the panel, jump to a message, copy its excerpt, edit its note, or delete it.
+- A **toggle strip** sits on the right edge; click it to expand/collapse the
+  sidebar.
+- The sidebar shows **produced files grouped by turn**; click one to open it.
+- **Markdown**: use the Source / Preview buttons to switch.
+- **Code/text**: edit directly, then **Save**.
+- Clicking a file name inside a conversation reply also opens it in the sidebar.
 
 ## Architecture
 
-A standard two-half DSH plugin:
-
-- **Host half** (`src/index.ts`) — an intentional no-op; it exists only so the
-  plugin mounts in the profile cordis tree and its client half is discovered.
-- **Client half** (`src/client/index.ts`) — registers the zh/en dictionaries
-  and contributes two slots:
-  - `conversation.chat.assistant-actions` — the per-message toggle,
-  - `conversation.session.header.actions` — the header list/panel.
-- **Store** (`src/client/store.ts`) — a per-session observable controller
-  (`getSnapshot`/`subscribe`) persisted to `localStorage`; the slot framework
-  binds it into a `useBookmarks` selector hook.
-
-Two install channels ship from one build:
+- **Host half** (`src/index.ts`) — fenced routes: `/viewer/read` (text JSON +
+  binary detection), `/viewer/media` (image bytes), `/viewer/write` (save
+  edits). Every route passes the /api trust fence and confines paths to the
+  session cwd.
+- **Client half** (`src/client/index.ts`) — wraps `ctx.workspaces.openPath`,
+  subscribes to the session's conversation snapshot to derive produced files,
+  and mounts a right sidebar.
 
 | channel | manifest | client bundle id |
 |---|---|---|
@@ -58,22 +56,18 @@ Two install channels ship from one build:
 ```sh
 pnpm install
 pnpm typecheck
-pnpm test
+pnpm test          # vitest unit tests
+pnpm test:smoke    # mount smoke against a running DSH (http://127.0.0.1:3080)
+pnpm test:e2e      # isolated scratch dsh web + Playwright
 pnpm build
 ```
 
-`build` emits `lib/index.js` (host), `lib/client.js` and `lib/client-registry.js`
-(client bundles), and `lib/types/` (declarations).
-
 ## Security & limitations
 
-- **No host surface** — the plugin never touches the filesystem, network, or a
-  shell; every capability stays in the browser UI layer.
-- **`localStorage` persistence** — bookmarks live in the browser and do not
-  sync across devices. Storage is best-effort and degrades to in-memory state
-  when blocked (e.g. private mode).
-- **Jump-back scope** — a bookmark can only scroll to a message still inside the
-  current conversation window; messages paged out of the window have no anchor.
+- Reads/writes are confined to the session cwd and size-capped (`readLimit`
+  512 KB, `mediaLimit` 20 MB, `writeLimit` 5 MB by default).
+- Writes are atomic (temp file + rename).
+- PDFs are served as binary, not rendered inline.
 
 ## License
 

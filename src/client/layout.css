@@ -1,0 +1,5 @@
+/* Pushes the main conversation column when the viewer sidebar is open. */
+#root {
+  margin-right: var(--dsh-viewer-width, 0px);
+  transition: margin-right 0.2s ease;
+}
