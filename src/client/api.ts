@@ -80,3 +80,31 @@ export async function revealFolder(sessionId: string, path: string, cwd?: string
     throw new Error(message)
   }
 }
+
+/** One tree entry from the workspace explorer. */
+export interface TreeEntry {
+  name: string
+  path: string
+  type: 'folder' | 'file'
+}
+
+/** List one directory's entries for the workspace explorer. */
+export async function listDirectory(sessionId: string, path: string, cwd?: string): Promise<TreeEntry[]> {
+  const url = new URL('/viewer/tree', window.location.origin)
+  url.searchParams.set('sessionId', sessionId)
+  url.searchParams.set('path', path)
+  if (cwd !== undefined && cwd !== '') url.searchParams.set('cwd', cwd)
+  const response = await fetch(url, { credentials: 'same-origin' })
+  if (!response.ok) {
+    let message = `list failed (${response.status})`
+    try {
+      const body = (await response.json()) as { error?: string }
+      if (typeof body.error === 'string') message = body.error
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new Error(message)
+  }
+  const body = (await response.json()) as { ok: boolean; entries: TreeEntry[] }
+  return body.entries
+}

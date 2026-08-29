@@ -5,3 +5,8 @@ packages: []
 # 豁免其最小发布年龄检查，保证仓库在任何时刻均可 pnpm install。
 minimumReleaseAgeExclude:
   - es-module-lexer@2.3.2
+
+# node-pty 是原生模块，需要放行它的构建脚本（github:/本地 link 安装时 build 不拦截）。
+allowBuilds:
+  node-pty: true
+  ws: true

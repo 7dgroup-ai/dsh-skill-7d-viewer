@@ -64,6 +64,10 @@
   "license": "MIT",
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^5.5.0",
+    "node-pty": "^1.1.0",
+    "ws": "^8.18.0",
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-go": "^6.0.1",
@@ -98,6 +102,7 @@
     "@deepseek-ai/dsh-client-ui-primitives": "0.1.1-rc.2",
     "@playwright/test": "1.58.2",
     "@types/node": "^24.0.0",
+    "@types/ws": "^8.5.10",
     "@types/react": "~18.3.1",
     "@types/react-dom": "~18.3.1",
     "lightningcss": "^1.32.0",

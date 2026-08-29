@@ -23,6 +23,7 @@ export interface ViewerState {
   listWidth: number
   files: ProducedFile[]
   selectedPath: string | null
+  terminalTab: string | null
   status: ViewerStatus
   content: string
   savedContent: string
@@ -90,6 +91,7 @@ const INITIAL_STATE: ViewerState = {
   listWidth: loadListWidth(),
   files: [],
   selectedPath: null,
+  terminalTab: null,
   status: 'loading',
   content: '',
   savedContent: '',
@@ -107,6 +109,7 @@ export class ViewerStore {
   private state: ViewerState = INITIAL_STATE
   private readonly listeners = new Set<() => void>()
   private loadSeq = 0
+  private terminalSeq = 0
   private sessionId = ''
   private cwd = ''
 
@@ -115,6 +118,11 @@ export class ViewerStore {
   /** The current session working directory (for tree building). */
   getCwd(): string {
     return this.cwd
+  }
+
+  /** The current session id. */
+  getSessionId(): string {
+    return this.sessionId
   }
 
   subscribe = (listener: () => void): (() => void) => {
@@ -142,6 +150,17 @@ export class ViewerStore {
 
   openSidebar(): void {
     this.commit({ ...this.state, sidebarOpen: true })
+  }
+
+  /** Open a new terminal (replacing the file view). */
+  openTerminal(): void {
+    const tab = `terminal-${++this.terminalSeq}`
+    this.commit({ ...this.state, terminalTab: tab, selectedPath: null })
+  }
+
+  /** Close the open terminal (back to the file view). */
+  closeTerminal(): void {
+    this.commit({ ...this.state, terminalTab: null })
   }
 
   /** Set the sidebar width (clamped to the viewport) and persist it. */
@@ -174,6 +193,7 @@ export class ViewerStore {
     this.commit({
       ...this.state,
       selectedPath: path,
+      terminalTab: null,
       status: 'loading',
       content: '',
       savedContent: '',

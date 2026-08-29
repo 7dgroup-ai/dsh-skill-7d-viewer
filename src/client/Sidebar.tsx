@@ -14,6 +14,8 @@ import {
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { CodeEditor } from './CodeEditor.tsx'
 import { buildFileTree, type FileTreeNode } from './file-tree.ts'
+import { TerminalView } from './TerminalView.tsx'
+import { WorkspaceTree } from './WorkspaceTree.tsx'
 import { t } from './locales.ts'
 import type { ViewerStore } from './sidebar-store.ts'
 import css from './sidebar.module.css'
@@ -175,6 +177,7 @@ function ViewerPane({ store }: { store: ViewerStore }) {
 export function Sidebar({ store }: { store: ViewerStore }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
   const root = buildFileTree(state.files, store.getCwd())
+  const [viewMode, setViewMode] = useState<'produced' | 'workspace'>('produced')
 
   // Push the main column by the viewer width (layout.css maps the variable).
   useEffect(() => {
@@ -228,16 +231,47 @@ export function Sidebar({ store }: { store: ViewerStore }) {
       </div>
       <div className={css.body}>
         <div className={css.listPane} style={{ width: state.listWidth }}>
-          <div className={css.listTitle}>{t('files')}</div>
-          {state.files.length === 0
-            ? <div className={css.empty}>{t('noFiles')}</div>
-            : <FileTree root={root} onOpen={path => store.openFile(path)} onReveal={path => { void store.reveal(path) }} />}
+          <div className={css.listToolbar}>
+            <button
+              type="button"
+              className={viewMode === 'produced' ? `${css.tab} ${css.tabActive}` : css.tab}
+              onClick={() => setViewMode('produced')}
+            >
+              {t('producedFiles')}
+            </button>
+            <button
+              type="button"
+              className={viewMode === 'workspace' ? `${css.tab} ${css.tabActive}` : css.tab}
+              onClick={() => setViewMode('workspace')}
+            >
+              {t('workspace')}
+            </button>
+            <button
+              type="button"
+              className={state.terminalTab !== null ? `${css.tab} ${css.tabActive}` : css.tab}
+              onClick={() => state.terminalTab !== null ? store.closeTerminal() : store.openTerminal()}
+            >
+              {t('terminal')}
+            </button>
+          </div>
+          {viewMode === 'produced'
+            ? (state.files.length === 0
+              ? <div className={css.empty}>{t('noFiles')}</div>
+              : <FileTree root={root} onOpen={path => store.openFile(path)} onReveal={path => { void store.reveal(path) }} />)
+            : <WorkspaceTree
+                cwd={store.getCwd()}
+                sessionId={store.getSessionId()}
+                onOpen={path => store.openFile(path)}
+                onReveal={path => { void store.reveal(path) }}
+              />}
         </div>
         <div className={css.listResizeHandle} onPointerDown={onListResizeStart} aria-hidden="true" />
         <div className={css.contentPane}>
-          {state.selectedPath === null
-            ? <div className={css.empty}>{t('selectFile')}</div>
-            : <ViewerPane store={store} />}
+          {state.terminalTab !== null
+            ? <TerminalView sessionId={store.getSessionId()} cwd={store.getCwd()} tab={state.terminalTab} />
+            : (state.selectedPath === null
+              ? <div className={css.empty}>{t('selectFile')}</div>
+              : <ViewerPane store={store} />)}
         </div>
       </div>
     </aside>

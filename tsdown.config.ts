@@ -21,7 +21,7 @@
  */
 import { readFile } from 'node:fs/promises'
 import { basename, dirname, relative, resolve as resolvePath, sep } from 'node:path'
-import { builtinModules } from 'node:module'
+import { builtinModules, createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import type { UserConfig } from 'tsdown'
 import { transform } from 'lightningcss'
@@ -101,9 +101,9 @@ function makeCssPlugin(pluginId: string): BuildPlugin {
     name: 'dsh-css-inline',
     resolveId(source: string, importer: string | undefined) {
       if (!source.endsWith('.css')) return null
-      const abs = source.startsWith('.')
+      const abs = (source.startsWith('.') || source.startsWith('/'))
         ? (importer === undefined ? source : resolvePath(dirname(importer), source))
-        : source
+        : createRequire(import.meta.url).resolve(source)
       return CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
     },
     async load(virtualId: string) {

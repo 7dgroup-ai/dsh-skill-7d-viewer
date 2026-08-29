@@ -94,11 +94,49 @@
   font-weight: 600;
 }
 
+/* Toggle between produced-file and workspace views. */
+.listToolbar {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.tabActive {
+  background: var(--dsw-alias-interactive-bg-active);
+  color: var(--dsw-alias-label-primary);
+  font-weight: 600;
+}
+
 .contentPane {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
+}
+
+.terminalHost {
+  flex: 1;
+  min-height: 0;
+  padding: 8px;
+  background: var(--dsw-alias-bg-layer-1);
 }
 
 .header {
@@ -222,6 +260,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.treeLoading {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
 }
 
 .empty {

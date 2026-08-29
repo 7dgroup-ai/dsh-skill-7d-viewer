@@ -14,6 +14,12 @@ export interface ViewerConfig {
   mediaLimit?: number
   /** Write cap of one file save (bytes); larger writes are refused. */
   writeLimit?: number
+  /** Concurrent terminals per session. */
+  terminalsPerSession?: number
+  /** Terminal shell executable; empty = $SHELL then the OS login shell. */
+  shell?: string
+  /** Reconnect grace for a disconnected terminal (ms). */
+  reconnectGraceMs?: number
 }
 
 /** Schemastery schema for the plugin configuration. */
@@ -21,6 +27,9 @@ export const Config: z<ViewerConfig> = z.object({
   readLimit: z.number().step(1).min(1).default(512 * 1024),
   mediaLimit: z.number().step(1).min(1).default(20 * 1024 * 1024),
   writeLimit: z.number().step(1).min(1).default(5 * 1024 * 1024),
+  terminalsPerSession: z.number().step(1).min(1).default(3),
+  shell: z.string().default(''),
+  reconnectGraceMs: z.number().step(1).min(0).default(30_000),
 })
 
 /** Fully defaulted viewer host settings. */
@@ -28,6 +37,9 @@ export interface ResolvedViewerConfig {
   readLimit: number
   mediaLimit: number
   writeLimit: number
+  terminalsPerSession: number
+  shell: string
+  reconnectGraceMs: number
 }
 
 /**
@@ -40,5 +52,8 @@ export function resolveViewerConfig(config: ViewerConfig | undefined): ResolvedV
     readLimit: config?.readLimit ?? 512 * 1024,
     mediaLimit: config?.mediaLimit ?? 20 * 1024 * 1024,
     writeLimit: config?.writeLimit ?? 5 * 1024 * 1024,
+    terminalsPerSession: config?.terminalsPerSession ?? 3,
+    shell: config?.shell?.trim() ?? '',
+    reconnectGraceMs: config?.reconnectGraceMs ?? 30_000,
   }
 }
